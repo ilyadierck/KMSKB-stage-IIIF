@@ -1,0 +1,21 @@
+Omgevings analyse
+----------------
+Welke data is er beschikbaar?
+	- Schilderijen 
+		http://www.opac-fabritius.be/nl/F_database.htm
+	- Documenten (Beelden)
+		http://www.opac-archibald.be/nl/F_database.htm
+	- Resterende archieven (brieven, formele documenten, ..)
+		https://historicalarchives.fine-arts-museum.be/
+ 
+Welke projecten lopen er?	-->	Veel, wij maken deel uit van HENSOR
+					https://www.fine-arts-museum.be/nl/onderzoek/onderzoeksprojecten/hensor
+
+Wat voor ambities heeft het museum?
+	- Collecties beter doorzoekbaar maken
+	- Bestaande digitale schilderijen verrijken met metadata op basis van AI
+
+Doelstellingen project
+	- Tools ontwikkelen om annotaties te maken van schilderijen (meer metadata toevoegen)
+	- Eventuele automatische processing met computer vision.
+
