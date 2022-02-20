@@ -1,0 +1,8 @@
+Start commando
+-----------------
+java -Dcantaloupe.config=cantaloupe.properties -Xmx2g -jar cantaloupe-5.0.5.jar
+
+
+Link IIIF schilderij
+-----------------
+
