@@ -2,10 +2,10 @@ from bs4 import BeautifulSoup
 import requests
 
 base_url = "http://193.190.214.119/"
-painting_url = "http://193.190.214.119/fabritiusweb/FullBBBody.csp?SearchMethod=Find_1&Profile=Default&OpacLanguage=dut&EncodedRequest=k*F7x*E4*A2*F4At*08*CEz*F2*9A*C3*EA*F1&PageType=FullBB&RecordNumber="
-
+painting_url = "http://193.190.214.119/fabritiusweb/FullBBBody.csp?SearchMethod=Find_1&Profile=Default&OpacLanguage=dut&EncodedRequest=*C3*AA*E4*E7*CEP*CF*C5*9B*9E*F87Cu*AE*CA&PageType=FullBB&RecordNumber="
 page = requests.get(painting_url)
 soup = BeautifulSoup(page.content, "html.parser")
+
 
 # Get image url
 table = soup.find("table", summary="FullBB.Description")
@@ -16,15 +16,21 @@ painting_metadata = table.find_all("tr")
 # Collect metadata
 for painting_data in painting_metadata:
     for td in painting_data.find_all("td"):
-        for content in td.contents:
-            res = content.string
-            print(res)
+        if len(td) > 1:
+            for child in td:
+                res = child.string
+                if res != None and len(res) > 2:
+                    print(child.string.replace("\n", ""))
+        else:
+            print(td.string)
 
 # Get painting image source
-img_src = table.find("img")["src"]
+images = table.find_all("img")
 
-name_painting = img_src.split("/")[-1]
+for image in images:
+    img_src = image['src']
+    name_painting = img_src.split("/")[-1]
 
-# Save image
-r = requests.get(base_url + img_src, allow_redirects=True)
-open(name_painting, 'wb').write(r.content)
+    # Save image
+    r = requests.get(base_url + img_src, allow_redirects=True)
+    open(name_painting, 'wb').write(r.content)
