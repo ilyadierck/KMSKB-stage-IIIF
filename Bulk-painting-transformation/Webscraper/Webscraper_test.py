@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 
 base_url = "http://193.190.214.119/"
-painting_url = "http://193.190.214.119/fabritiusweb/FullBBBody.csp?SearchMethod=Find_1&Profile=Default&OpacLanguage=dut&EncodedRequest=*C3*AA*E4*E7*CEP*CF*C5*9B*9E*F87Cu*AE*CA&PageType=FullBB&RecordNumber="
+painting_url = "http://193.190.214.119/fabritiusweb/FullBBBody.csp?SearchMethod=Find_1&Profile=Default&OpacLanguage=dut&EncodedRequest=*2F*BF*06q*25*11*2Ca*AA*AD*D9P*A3LX*86&PageType=FullBB&RecordNumber="
 page = requests.get(painting_url)
 soup = BeautifulSoup(page.content, "html.parser")
 
