@@ -1,35 +1,35 @@
 {
   "@context": "http://iiif.io/api/presentation/2/context.json",
-  "@id": "http://localhost:8182/iiif/2/identifier/manifest.json",
+  "@id": "http://localhost:8182/iiif/2/Cranach.json",
   "@type": "sc:Manifest",
-  "label": "Example Manifest 2",
+  "label": "Cranach",
   "sequences": [
     {
       "@type": "sc:Sequence",
       "canvases": [
         {
-          "@id": "http://localhost:8182/iiif/2/canvas/Bouts-test-painting.jpg.json",
+          "@id": "http://localhost:8182/iiif/2/canvas/Cranach-4759dig-L.jpg.json",
           "@type": "sc:Canvas",
-          "label": "Bouts-test-painting.jpg",
+          "label": "Cranach",
           "height": 422,
-          "width": 356,
+          "width": 192,
           "images": [
             {
               "@type": "oa:Annotation",
               "motivation": "sc:painting",
               "resource": {
-                "@id": "http://localhost:8182/iiif/2/Bouts-test-painting.jpg/full/full/0/default.jpg",
+                "@id": "http://localhost:8182/iiif/2/Cranach-4759dig-L.jpg/full/full/0/default.jpg",
                 "@type": "dctypes:Image",
                 "format": "image/jpeg",
                 "height": 422,
-                "width": 356,
+                "width": 192,
                 "service": {
                   "@context": "http://iiif.io/api/image/2/context.json",
-                  "@id": "http://localhost:8182/iiif/2/Bouts-test-painting.jpg",
+                  "@id": "http://localhost:8182/iiif/2/Cranach-4759dig-L.jpg",
                   "profile": "http://iiif.io/api/image/2/level2.json"
                 }
               },
-              "on": "http://localhost:8182/iiif/2/canvas/Bouts-test-painting.jpg.json"
+              "on": "http://localhost:8182/iiif/2/canvas/Cranach-4759dig-L.jpg.json"
             }
           ]
         }

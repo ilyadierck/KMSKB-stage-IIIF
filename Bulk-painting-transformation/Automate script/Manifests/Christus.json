@@ -1,0 +1,143 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://localhost:8182/iiif/2/Christus.json",
+  "@type": "sc:Manifest",
+  "label": "Christus",
+  "sequences": [
+    {
+      "@type": "sc:Sequence",
+      "canvases": [
+        {
+          "@id": "http://localhost:8182/iiif/2/canvas/Christus-564det1dig-L.jpg.json",
+          "@type": "sc:Canvas",
+          "label": "Christus",
+          "height": 322,
+          "width": 429,
+          "images": [
+            {
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "http://localhost:8182/iiif/2/Christus-564det1dig-L.jpg/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 322,
+                "width": 429,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8182/iiif/2/Christus-564det1dig-L.jpg",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "http://localhost:8182/iiif/2/canvas/Christus-564det1dig-L.jpg.json"
+            }
+          ]
+        },
+        {
+          "@id": "http://localhost:8182/iiif/2/canvas/Christus-564det2dig-L.jpg.json",
+          "@type": "sc:Canvas",
+          "label": "Christus",
+          "height": 322,
+          "width": 429,
+          "images": [
+            {
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "http://localhost:8182/iiif/2/Christus-564det2dig-L.jpg/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 322,
+                "width": 429,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8182/iiif/2/Christus-564det2dig-L.jpg",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "http://localhost:8182/iiif/2/canvas/Christus-564det2dig-L.jpg.json"
+            }
+          ]
+        },
+        {
+          "@id": "http://localhost:8182/iiif/2/canvas/Christus-564det3dig-L.jpg.json",
+          "@type": "sc:Canvas",
+          "label": "Christus",
+          "height": 322,
+          "width": 429,
+          "images": [
+            {
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "http://localhost:8182/iiif/2/Christus-564det3dig-L.jpg/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 322,
+                "width": 429,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8182/iiif/2/Christus-564det3dig-L.jpg",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "http://localhost:8182/iiif/2/canvas/Christus-564det3dig-L.jpg.json"
+            }
+          ]
+        },
+        {
+          "@id": "http://localhost:8182/iiif/2/canvas/Christus-564det4dig-L.jpg.json",
+          "@type": "sc:Canvas",
+          "label": "Christus",
+          "height": 311,
+          "width": 428,
+          "images": [
+            {
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "http://localhost:8182/iiif/2/Christus-564det4dig-L.jpg/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 311,
+                "width": 428,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8182/iiif/2/Christus-564det4dig-L.jpg",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "http://localhost:8182/iiif/2/canvas/Christus-564det4dig-L.jpg.json"
+            }
+          ]
+        },
+        {
+          "@id": "http://localhost:8182/iiif/2/canvas/Christus-564dig-L.jpg.json",
+          "@type": "sc:Canvas",
+          "label": "Christus",
+          "height": 219,
+          "width": 422,
+          "images": [
+            {
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "http://localhost:8182/iiif/2/Christus-564dig-L.jpg/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 219,
+                "width": 422,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8182/iiif/2/Christus-564dig-L.jpg",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "http://localhost:8182/iiif/2/canvas/Christus-564dig-L.jpg.json"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
