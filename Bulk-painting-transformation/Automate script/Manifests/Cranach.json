@@ -1,0 +1,39 @@
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://localhost:8182/iiif/2/Cranach.json",
+  "@type": "sc:Manifest",
+  "label": "Cranach",
+  "sequences": [
+    {
+      "@type": "sc:Sequence",
+      "canvases": [
+        {
+          "@id": "http://localhost:8182/iiif/2/canvas/Cranach-4759dig-L.jpg.json",
+          "@type": "sc:Canvas",
+          "label": "Cranach",
+          "height": 422,
+          "width": 192,
+          "images": [
+            {
+              "@type": "oa:Annotation",
+              "motivation": "sc:painting",
+              "resource": {
+                "@id": "http://localhost:8182/iiif/2/Cranach-4759dig-L.jpg/full/full/0/default.jpg",
+                "@type": "dctypes:Image",
+                "format": "image/jpeg",
+                "height": 422,
+                "width": 192,
+                "service": {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id": "http://localhost:8182/iiif/2/Cranach-4759dig-L.jpg",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              },
+              "on": "http://localhost:8182/iiif/2/canvas/Cranach-4759dig-L.jpg.json"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

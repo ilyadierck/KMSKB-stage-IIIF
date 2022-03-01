@@ -1,0 +1,65 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/anno.jsonld",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
+  "id": "http://127.0.0.1:8887/0-test-painting-1/index.json",
+  "type": "Manifest",
+  "items": [
+    {
+      "id": "http://127.0.0.1:8887/0-test-painting-1/index.json/canvas/0",
+      "type": "Canvas",
+      "items": [
+        {
+          "id": "http://127.0.0.1:8887/0-test-painting-1/index.json/canvas/0/annotationpage/0",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "http://127.0.0.1:8887/0-test-painting-1/index.json/canvas/0/annotation/0",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "http://127.0.0.1:8887/0-test-painting-1/_woman-sketch/woman-sketch.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "label": {
+                  "@none": [
+                    "_woman-sketch"
+                  ]
+                },
+                "width": 640,
+                "height": 435,
+                "service": [
+                  {
+                    "@id": "http://127.0.0.1:8887/0-test-painting-1/_woman-sketch/+tiles",
+                    "@type": "ImageService2",
+                    "profile": "http://iiif.io/api/image/2/level2.json"
+                  }
+                ]
+              },
+              "target": "http://127.0.0.1:8887/0-test-painting-1/index.json/canvas/0"
+            }
+          ]
+        }
+      ],
+      "label": {
+        "@none": [
+          "_woman-sketch"
+        ]
+      },
+      "width": 640,
+      "height": 435,
+      "thumbnail": [
+        {
+          "id": "http://127.0.0.1:8887/_woman-sketch/0-test-painting-1/thumb.jpg",
+          "type": "Image"
+        }
+      ]
+    }
+  ],
+  "label": {
+    "@none": [
+      "0-test-painting-1"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/anno.jsonld",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
+  "id": "http://127.0.0.1:8887/index.json",
+  "type": "Collection",
+  "items": [
+    {
+      "id": "http://127.0.0.1:8887/0-test-painting-1/index.json",
+      "type": "Manifest",
+      "label": {
+        "@none": [
+          "0-test-painting-1"
+        ]
+      }
+    },
+    {
+      "id": "http://127.0.0.1:8887/1-test-painting-2/index.json",
+      "type": "Manifest",
+      "label": {
+        "@none": [
+          "1-test-painting-2"
+        ]
+      }
+    }
+  ],
+  "label": {
+    "@none": [
+      "paintings"
+    ]
+  }
+}
