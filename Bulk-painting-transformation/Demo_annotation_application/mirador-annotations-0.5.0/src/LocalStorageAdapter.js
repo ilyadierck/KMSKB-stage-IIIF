@@ -7,6 +7,7 @@ export default class LocalStorageAdapter {
 
   /** */
   async create(annotation) {
+    console.log(annotation)
     const emptyAnnoPage = {
       id: this.annotationPageId,
       items: [],
