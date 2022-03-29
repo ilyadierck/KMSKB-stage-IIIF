@@ -14,10 +14,23 @@ export default class CustomFlaskAdapter {
         type: 'AnnotationPage',
       };
 
-      const annotationPage = await this.all() || emptyAnnoPage;
-      annotationPage.items.push(annotation);
+      let annotationPage =  await this.all();
 
-       fetch(this.apiUrl, {
+      if (annotationPage){
+        annotationPage.items.push(annotation);
+        fetch(this.apiUrl, {
+                body: JSON.stringify(annotationPage),
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin':'*'
+                },
+                method: 'PATCH'
+            });
+      } else {
+        annotationPage = emptyAnnoPage;
+        annotationPage.items.push(annotation);
+        fetch(this.apiUrl, {
             body: JSON.stringify(annotationPage),
             headers: {
                 Accept: 'application/json',
@@ -26,7 +39,7 @@ export default class CustomFlaskAdapter {
             },
             method: 'POST'
         });
-        
+      }
         return annotationPage;
     }
   
@@ -91,7 +104,12 @@ export default class CustomFlaskAdapter {
         .then(resp => resp.json())
         .then(function(annotationPages){
             let res = annotationPages[annotationPageId];
-            return res;
+            if (res != undefined){
+                return JSON.parse(res);
+            }
+            else {
+                return res;
+            }
         });
     }
   }

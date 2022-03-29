@@ -16,6 +16,7 @@ class Annotation(Resource):
         content = request.json
         content = json.loads(json.dumps(content))
         id = content.get('id')
+        print(content)
         storage[id] = content
         return content
 
