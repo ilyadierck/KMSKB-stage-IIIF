@@ -7,7 +7,7 @@ export default class LocalStorageAdapter {
 
   /** */
   async create(annotation) {
-    console.log(annotation)
+    console.log("create")
     const emptyAnnoPage = {
       id: this.annotationPageId,
       items: [],
@@ -16,6 +16,7 @@ export default class LocalStorageAdapter {
     const annotationPage = await this.all() || emptyAnnoPage;
     annotationPage.items.push(annotation);
     localStorage.setItem(this.annotationPageId, JSON.stringify(annotationPage));
+    console.log(annotationPage);
     return annotationPage;
   }
 
@@ -43,6 +44,7 @@ export default class LocalStorageAdapter {
 
   /** */
   async get(annoId) {
+    console.log("get")
     const annotationPage = await this.all();
     if (annotationPage) {
       return annotationPage.items.find((item) => item.id === annoId);
@@ -52,6 +54,7 @@ export default class LocalStorageAdapter {
 
   /** */
   async all() {
+    console.log("all")
     return JSON.parse(localStorage.getItem(this.annotationPageId));
   }
 }
