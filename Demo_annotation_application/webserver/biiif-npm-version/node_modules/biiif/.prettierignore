@@ -1,0 +1,12 @@
+node_modules
+test
+collection
+.gitignore
+.npmignore
+.prettierignore
+.vscode
+.travis.yml
+*.txt
+*.js
+*.js.map
+*.json
