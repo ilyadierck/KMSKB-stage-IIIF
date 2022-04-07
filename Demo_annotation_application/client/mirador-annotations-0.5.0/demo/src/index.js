@@ -2,7 +2,7 @@ import mirador from 'mirador/dist/es/src/index';
 import { func } from 'prop-types';
 import annotationPlugins from '../../src';
 import CustomFlaskAdapter from '../../src/CustomFlaskAdapter';
-import testComponent from './components/test-component';
+import testComponent from './components/fabritiusMainPage';
 
 function initialiseMirador(){
   const endpointUrl = "http://127.0.0.1:5000/annotations";
@@ -20,7 +20,7 @@ function initialiseMirador(){
     //}],
   };
   const plugin = {
-    target: 'WorkspaceAdd',
+    target: 'Workspace',
     mode: 'wrap',
     component: testComponent,
     //connectOptions: additionalOptionsToPassToReduxConnect,

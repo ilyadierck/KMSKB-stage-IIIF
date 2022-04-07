@@ -21,6 +21,10 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/lab": "^5.0.0-alpha.76",
+    "@mui/material": "^5.6.0",
     "@psychobolt/react-paperjs": "^1.0.0",
     "@psychobolt/react-paperjs-editor": "^0.0.14",
     "draft-js": "^0.11.6",
@@ -29,6 +33,7 @@
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.6.0",
     "material-ui-color-components": "^0.3.0",
+    "mui": "^0.0.1",
     "paper": "^0.12.11",
     "react-color": "^2.18.1"
   },
