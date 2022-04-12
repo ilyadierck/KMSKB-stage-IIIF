@@ -8,39 +8,47 @@ import ListItem from '@material-ui/core/ListItem';
 import Skeleton from '@material-ui/lab/Skeleton';
 import ns from 'mirador/dist/es/src/config/css-ns';
 import ButtonBase from '@material-ui/core/ButtonBase';
+import { Img } from 'react-image';
 
+const xmlPath = "http://127.0.0.1:8887/database-dump/database-dump.xml"
 let miradorInstance;
 
-function handleClick(props){
+function handleClick(e){
+  let manifest = e.target.closest("li").dataset.manifestid;
   let clearWorkspace = mirador.actions.setWorkspaceAddVisibility(false);
   miradorInstance.store.dispatch(clearWorkspace);
 
   let action = mirador.actions.addWindow({
     companionWindows: "",
-    manifestId: "http://127.0.0.1:8887/biiif-npm-version/paintings/10000123-Meunier/index.json"
+    manifestId: manifest
   });
 
   miradorInstance.store.dispatch(action);
 
   let windowId = Object.keys(miradorInstance.store.getState().windows);
   windowId = undefined;
-  var action2 = mirador.actions.setCanvas(windowId, 'http://127.0.0.1:8887/biiif-npm-version/paintings/10000123-Meunier/index.json')
+  var action2 = mirador.actions.setCanvas(windowId, manifest)
   
   miradorInstance.store.dispatch(action2);
 }
 
 function ManifestListItem(props){
+    let recordInfo = props[1];
+    props = props[0];
+
     let buttonRef = "";
-    let manifestId = "http://127.0.0.1:8887/biiif-npm-version/paintings/10000123-Meunier/index.json";
+    let manifestId = recordInfo.manifestId;
     let ready = true;
-    let thumbnail = "";
+    let thumbnail = recordInfo.thumbnail;
     let isCollection = false;
-    let title = "test";
+    let title = recordInfo.title;
     let provider= props.provider;
     var t = props.t;
     let size = 60;
     let manifestLogo = "";
-
+    let description = recordInfo.description;
+    let author = recordInfo.author;
+    let createdDate = recordInfo.created;
 
     return /*#__PURE__*/React.createElement(ListItem, {
         divider: true,
@@ -93,23 +101,35 @@ function ManifestListItem(props){
         item: true,
         xs: 8,
         sm: 9,
-        component: "span"
+        component: "span",
+        style: {
+          textAlign: "left"
+        }
       }, isCollection && /*#__PURE__*/React.createElement(Typography, {
         component: "div",
         variant: "overline"
       }, t(isMultipart ? 'multipartCollection' : 'collection')), /*#__PURE__*/React.createElement(Typography, {
         component: "span",
         variant: "h6"
-      }, title || manifestId))))), /*#__PURE__*/React.createElement(Grid, {
+      }, description), React.createElement(Typography, {
+        style: {
+          marginTop: "1rem"
+        }
+      }, title))))), /*#__PURE__*/React.createElement(Grid, {
         item: true,
         xs: 8,
         sm: 4
       }, /*#__PURE__*/React.createElement(Typography, {
         className: ns('manifest-list-item-provider')
-      }, provider), /*#__PURE__*/React.createElement(Typography, null, t('numItems', {
-        count: size,
-        number: size
-      }))), /*#__PURE__*/React.createElement(Grid, {
+      }, provider), /*#__PURE__*/React.createElement(Typography, {
+
+      }, "Author: " + author.name + " (" + author.birthDate + " - " + author.deathDate +  ")"),
+      React.createElement(Typography, {
+          style: {
+            marginTop: "1rem"
+          }
+      }, "Created in: " + createdDate)
+      ), /*#__PURE__*/React.createElement(Grid, {
         item: true,
         xs: 4,
         sm: 2
@@ -139,32 +159,73 @@ function initialiseMirador(){
       defaultSideBarPanel: 'annotations',
       sideBarOpenByDefault: true,
     },
-    //windows: [{
-      //loadedManifest: 'http://127.0.0.1:8887/1-test-painting-2/index.json',
-    //}],
   };
-  const plugin = {
-    target: 'WorkspaceAdd',
-    mode: 'wrap',
-    component: function(props){
-      var t = props.t;
-      return (React.createElement('div', {
-        style: {
-          height: '100%',
-          width: "95%",
-          marginLeft: "auto",
-          marginRight: 0,
-          }
-        },
-        React.createElement('ul', {style: {backgroundColor: "#fff",padding:0, width: '98%'}},
-        React.createElement(ManifestListItem, props),
-        React.createElement(ManifestListItem, props)
-        )
-      ))}
-  };
+  fetchXml(xmlPath).then(function(infoRecords){
+    const plugin = {
+      target: 'WorkspaceAdd',
+      mode: 'wrap',
+      component: function(props){
+        return (React.createElement('div', {
+          style: {
+            height: '100%',
+            width: "95%",
+            marginLeft: "auto",
+            marginRight: 0,
+            overflow: "auto"
+            }
+          },
+          React.createElement('ul', {style: {backgroundColor: "#fff",padding:0, width: '98%'}},
+          infoRecords.map((recordInfo) =>
+              React.createElement(ManifestListItem, [props, recordInfo]),
+            )
+          )
+        ))}
+    };
+    miradorInstance = mirador.viewer(config, [...annotationPlugins, ...plugin]);
+  });
+  
+}
 
-  miradorInstance = mirador.viewer(config, [...annotationPlugins, ...plugin]);
+function getKey(key, record, backupValue){
+  let foundElements = record.getElementsByTagName(key)[0]
+  if (foundElements != undefined){
+    return foundElements.childNodes[0].nodeValue
+  } else {
+    return backupValue
+  } 
+}
+
+let lastIndex = 0;
+
+async function fetchXml(path){
+  return await fetch(path)
+        .then(response => response.text())
+        .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
+        .then(function(data){
+          let records = data.getElementsByTagName("record");
+          let gatheredInfo = [];
+          let limit = 20
+          for (let index in records){
+            if (index < limit){
+              let record = records[index];
+              let recordInfo = {
+                title: getKey("imageOpacLink", record, "").split("/").at(-1).replace("-", " ").replace("-L.jpg", ""),
+                thumbnail: "http://www.opac-fabritius.be" + getKey("imageOpacLink", record, ""),
+                created: getKey("latestDate", record, "unknown"),
+                description: getKey("termClassification", record, "") + " \n " + getKey("ObjectWorkType", record, ""),
+                author: {
+                  name: getKey("creatorDescription", record, "unknown"),
+                  birthDate: getKey("birthDateCreator", record, "unknown"),
+                  deathDate: getKey("deathDateCreator", record, "unknown")
+                },
+                manifestId: ("http://127.0.0.1:8887/biiif-npm-version/paintings/" + getKey("workID",record, "").replace("/", "").replace(" ", "") + "-" + getKey("imageOpacLink", record, "").split("/").at(-1).split("-").at(0).replace("/", "") + "/index.json").replace(" ", "")
+              }
+              gatheredInfo.push(recordInfo)
+            }
+            
+          }
+          return gatheredInfo;
+        });
 }
 
 initialiseMirador()
-
