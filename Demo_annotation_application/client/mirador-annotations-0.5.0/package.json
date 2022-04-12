@@ -30,12 +30,15 @@
     "draft-js": "^0.11.6",
     "draft-js-export-html": "^1.4.1",
     "draft-js-import-html": "^1.4.1",
+    "file-saver": "^2.0.5",
+    "fs": "^0.0.1-security",
     "immutable": "^4.0.0-rc.12",
     "jquery": "^3.6.0",
     "material-ui-color-components": "^0.3.0",
     "mui": "^0.0.1",
     "paper": "^0.12.11",
-    "react-color": "^2.18.1"
+    "react-color": "^2.18.1",
+    "xml-js": "^1.6.11"
   },
   "peerDependencies": {
     "@material-ui/core": "^4.9.13",

@@ -1,32 +1,34 @@
-import mirador from 'mirador/dist/es/src/index';
-import annotationPlugins from '../../src';
-import CustomFlaskAdapter from '../../src/CustomFlaskAdapter';
 import React, { Component, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import { Box, TextField } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem';
 import Skeleton from '@material-ui/lab/Skeleton';
+import Masonry from '@mui/lab/Masonry';
+import Paper from '@mui/material/Paper';
+import { styled } from '@mui/material/styles';
 import ns from 'mirador/dist/es/src/config/css-ns';
 import ButtonBase from '@material-ui/core/ButtonBase';
-
-let miradorInstance;
+import * as actions from 'mirador/dist/es/src/state/actions/';
+import {windowsReducer} from 'mirador/dist/es/src/state/reducers/windows.js'
+import ActionTypes from 'mirador/dist/es/src/state/actions/action-types.js';
+import mirador from 'mirador/dist/es/src/index';
+import { ReactReduxContext } from 'react-redux'
 
 function handleClick(props){
-  let clearWorkspace = mirador.actions.setWorkspaceAddVisibility(false);
-  miradorInstance.store.dispatch(clearWorkspace);
-
   let action = mirador.actions.addWindow({
     companionWindows: "",
     manifestId: "http://127.0.0.1:8887/biiif-npm-version/paintings/10000123-Meunier/index.json"
   });
+  console.log(this.state)
+  let store = mirador.createStore()
 
-  miradorInstance.store.dispatch(action);
+  store.dispatch(action);
 
-  let windowId = Object.keys(miradorInstance.store.getState().windows);
-  windowId = undefined;
+  const windowId = Object.keys(store.getState().windows)[0];
+
   var action2 = mirador.actions.setCanvas(windowId, 'http://127.0.0.1:8887/biiif-npm-version/paintings/10000123-Meunier/index.json')
-  
-  miradorInstance.store.dispatch(action2);
+  store.dispatch(action2);
 }
 
 function ManifestListItem(props){
@@ -128,43 +130,92 @@ function ManifestListItem(props){
       }))) : placeholder);
 }
 
-function initialiseMirador(){
-  const endpointUrl = "http://127.0.0.1:5000/annotations";
-  const config = {
-    annotation: {
-      adapter: (canvasId) => new CustomFlaskAdapter(canvasId, endpointUrl)
+
+function paintingDatabasePage(props){
+  return (<Box sx={{
+    display: 'flex',
+    flexDirection: 'column',
+    width: "89%",
+    height: '100%',
+    marginLeft: "auto",
+    marginRight: 0,
+    }}>
+      <Box style={{
+        padding: "1rem",
+        paddingLeft: 0
+      }}>
+        <Typography variant="h1">
+          Fabritius paintings
+        </Typography>
+      </Box>
+      <Box style={{
+        
+      }}>
+        <Typography variant="h2" style={{padding: "1rem 0"}}>
+          Browse the collections
+        </Typography>
+        <TextField style={{
+          width: "95%",
+          backgroundColor: "#F5F5F5",
+          borderRadius: "0.25rem"
+        }} label="Painting or artist name" variant="outlined"/>
+      </Box>
+     <ul style={{backgroundColor: "#fff"}}>
+        <ManifestListItem props={props}/>
+     </ul>
+  </Box>)
+}
+
+export default function(props){
+  var t = props.t;
+  return (React.createElement('div', {
+    style: {
+      height: '100%',
+      width: "95%",
+      marginLeft: "auto",
+      marginRight: 0,
+      }
     },
-    id: 'demo',
-    window: {
-      defaultSideBarPanel: 'annotations',
-      sideBarOpenByDefault: true,
-    },
-    //windows: [{
-      //loadedManifest: 'http://127.0.0.1:8887/1-test-painting-2/index.json',
-    //}],
-  };
-  const plugin = {
-    target: 'WorkspaceAdd',
-    mode: 'wrap',
-    component: function(props){
-      var t = props.t;
-      return (React.createElement('div', {
+    React.createElement('ul', {style: {backgroundColor: "#fff",padding:0, width: '98%'}},
+    React.createElement(ManifestListItem, props),
+    React.createElement(ManifestListItem, props)
+    )
+  ))
+}
+
+/*
+export default function (props) {
+    var t = props.t;
+    return React.createElement(Grid, {
+        container: true,
         style: {
           height: '100%',
           width: "95%",
           marginLeft: "auto",
           marginRight: 0,
-          }
-        },
-        React.createElement('ul', {style: {backgroundColor: "#fff",padding:0, width: '98%'}},
-        React.createElement(ManifestListItem, props),
-        React.createElement(ManifestListItem, props)
-        )
-      ))}
-  };
-
-  miradorInstance = mirador.viewer(config, [...annotationPlugins, ...plugin]);
+          justifyContent: "center",
+          alignContent: "center",
+          rowGap: "30%"
+        }
+      }, React.createElement(Grid, {
+        xs: 10,
+        item: true,
+        
+      }, React.createElement(TextField, {
+        label: "Painting or artist name",
+        variant: "outlined",
+        style: {
+          width: "95%",
+          backgroundColor: "#F5F5F5",
+          borderRadius: "0.25rem"
+        }
+      })),
+      React.createElement(Grid, {
+        xs: 10,
+        item: true,
+      },
+      React.createElement(Typography, {
+        variant: "h2"
+      },t("Results"))));
 }
-
-initialiseMirador()
-
+*/

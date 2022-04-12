@@ -65,7 +65,7 @@ function paintingDatabasePage(props){
         }} label="Painting or artist name" variant="outlined"/>
       </Box>
      <Box>
-       <Paintings></Paintings>
+      <ManifestListItem></ManifestListItem>
      </Box>
   </Box>)
 }
