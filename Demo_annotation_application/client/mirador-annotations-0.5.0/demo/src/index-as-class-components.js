@@ -9,7 +9,6 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import ns from 'mirador/dist/es/src/config/css-ns';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@mui/material/Button';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { Img } from 'react-image';
 import { times } from 'lodash';
 
@@ -69,10 +68,8 @@ class KmskbComponent extends Component {
 
   handleLoadMoreResources(){
     let temp = this;
-    temp.setState({"loading": true}),
     fetchXml().then(function(infoRecords){
-      temp.setState({"infoRecords" : temp.state.infoRecords.concat(infoRecords)});
-      temp.setState({"loading": false})
+      temp.setState({"infoRecords" : infoRecords});
     });
   }
   
@@ -95,52 +92,9 @@ class KmskbComponent extends Component {
     miradorInstance.store.dispatch(action2);
   }
   
-  render(){
-    let infoRecords = this.state.infoRecords;
-    if (infoRecords === null){
-      infoRecords = this.props.infoRecords;
-      this.setState({"infoRecords" : infoRecords})
-    }
-    return (React.createElement('div', {
-      style: {
-        height: '100%',
-        width: "95%",
-        marginLeft: "auto",
-        marginRight: 0,
-        overflow: "auto"
-        }
-      },
-      React.createElement('ul', {
-        id: "resources",
-        style: {
-          backgroundColor: "#fff",
-          padding:0, 
-          width: '98%'
-        }
-      },
-      infoRecords.map((recordInfo) =>
-          React.createElement(ManifestListItem, [this, recordInfo]),
-        )
-      ),
-      React.createElement("div", {
-        style: {
-          textAlign:"center"
-        }
-      },React.createElement(LoadingButton, {
-        loading: this.state.loading,
-        onClick: this.handleLoadMoreResources,
-        variant: "contained",
-        style:{
-          margin: "1rem",
-          textAlign: "center"
-        }
-      }, "Load more"))
-    ))
-  }
-}
-
-function ManifestListItem(options){
+  ManifestListItem(options){
       let recordInfo = options[1];
+      console.log(recordInfo);
       let props = options[0].props;
       let buttonRef = "";
       let manifestId = recordInfo.manifestId;
@@ -189,7 +143,7 @@ function ManifestListItem(options){
         }, /*#__PURE__*/React.createElement(Img, {
           //className: [classes.thumbnail, ns('manifest-list-item-thumb')].join(' '),
           src: thumbnail,
-          alt: "test",
+          alt: "",
           height: "80",
         })), /*#__PURE__*/React.createElement(Grid, {
           item: true,
@@ -240,6 +194,49 @@ function ManifestListItem(options){
             width: 60
           })
         }))) : placeholder);
+  }
+
+
+  render(){
+    let infoRecords = this.state.infoRecords;
+    if (infoRecords === null){
+      infoRecords = this.props.infoRecords;
+    }
+    return (React.createElement('div', {
+      style: {
+        height: '100%',
+        width: "95%",
+        marginLeft: "auto",
+        marginRight: 0,
+        overflow: "auto"
+        }
+      },
+      React.createElement('ul', {
+        id: "resources",
+        style: {
+          backgroundColor: "#fff",
+          padding:0, 
+          width: '98%'
+        }
+      },
+      infoRecords.map((recordInfo) =>
+          React.createElement(this.ManifestListItem, [this, recordInfo]),
+        )
+      ),
+      React.createElement("div", {
+        style: {
+          textAlign:"center"
+        }
+      },React.createElement(Button, {
+        onClick: this.handleLoadMoreResources,
+        variant: "contained",
+        style:{
+          margin: "1rem",
+          textAlign: "center"
+        }
+      }, "Load more"))
+    ))
+  }
 }
 
 function initialiseMirador(){
