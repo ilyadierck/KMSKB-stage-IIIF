@@ -1,3 +1,4 @@
+from email.mime import base
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 import mysql.connector
@@ -81,7 +82,47 @@ class Authors(Resource):
 
 class Resources(Resource):
     def get(self):
-        print("get")
+        parser = reqparse.RequestParser()
+        parser.add_argument('id', type=str)
+        parser.add_argument('authorName', type=str)
+        parser.add_argument('authorBirthdate', type=str)
+        parser.add_argument('authorDeathdate', type=str)
+        parser.add_argument('creationYear', type=str)
+        parser.add_argument('description', type=str)
+        args = parser.parse_args()
+
+        endResourceSql = "SELECT * FROM resources WHERE "
+        filler = ""
+        if args["id"] != None and args["id"] != "":
+            endResourceSql = endResourceSql + filler + "id='" + args["id"] + "'"
+            filler = " AND "
+        if args["creationYear"] != None and args["creationYear"] != "":
+            endResourceSql = endResourceSql + filler + "creationYear='" + args["creationYear"] + "'"
+            filler = " AND "
+        if args["description"] != None and args["description"] != "":
+            endResourceSql = endResourceSql + filler + "description LIKE '%" + args["description"] + "%'"
+            filler = " AND "
+
+        endAuthorSql = "SELECT id FROM authors WHERE "
+        filler = ""
+        if args["authorName"] != None and args["authorName"] != "":
+            endAuthorSql = endAuthorSql + filler + "name LIKE '%" + args["authorName"] + "%'"
+            filler = " AND "
+        if args["authorBirthdate"] != None and args["authorBirthdate"] != "":
+            endAuthorSql = endAuthorSql + filler + "birthdate='" + args["authorBirthdate"] + "'"
+            filler = " AND "
+        if args["authorDeathdate"] != None and args["authorDeathdate"] != "":
+            endAuthorSql = endAuthorSql + filler + "deathdate='" + args["authorDeathdate"] + "'"
+            filler = " AND "
+
+        mycursor = mydb.cursor()
+
+        if filler != "":
+            endResourceSql += filler + "authorId in (" +  endAuthorSql + ")"
+
+        print(endResourceSql)
+        mycursor.execute(endResourceSql)
+        return mycursor.fetchall()
     
     def post(self):
         content = request.json
