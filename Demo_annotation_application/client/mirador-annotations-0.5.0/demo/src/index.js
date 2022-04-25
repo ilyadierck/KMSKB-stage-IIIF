@@ -3,8 +3,7 @@ import annotationPlugins from '../../src';
 import CustomFlaskAdapter from '../../src/CustomFlaskAdapter';
 import React, { Component, useContext, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import ListItem from '@material-ui/core/ListItem';
+import { Typography, ListItem, TextField } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import ns from 'mirador/dist/es/src/config/css-ns';
 import ButtonBase from '@material-ui/core/ButtonBase';
@@ -28,14 +27,14 @@ function getKey(key, record, backupValue){
 let lastIndex = 0;
 
 async function fetchXml(){
-  return await fetch(xmlUrl)
+  return fetch(xmlUrl)
         .then(response => response.text())
         .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
         .then(function(data){
           let records = data.getElementsByTagName("record");
           let gatheredInfo = [];
           let limit = lastIndex + 20
-          for (let i = lastIndex; i < records.length; i++){
+          for (let i = lastIndex+1; i < records.length; i++){
             if (i < limit){
               let record = records[i];
               let recordInfo = {
@@ -65,6 +64,10 @@ class KmskbComponent extends Component {
     this.handleClick = this.handleClick.bind(this);
     this.handleLoadMoreResources = this.handleLoadMoreResources.bind(this);
     this.state = {"infoRecords" : null} ;
+  }
+
+  handleResourceLookup(){
+
   }
 
   handleLoadMoreResources(){
@@ -109,7 +112,17 @@ class KmskbComponent extends Component {
         marginRight: 0,
         overflow: "auto"
         }
-      },
+      },React.createElement(TextField, {
+        style: {
+          marginTop:"2rem",
+          width: "98%",
+          backgroundColor: "#F5F5F5",
+          borderRadius: "0.25rem"
+        },
+        label: "Painting or artist name",
+        variant: "outlined",
+        onchange: this.handleResourceLookup
+      }),
       React.createElement('ul', {
         id: "resources",
         style: {
