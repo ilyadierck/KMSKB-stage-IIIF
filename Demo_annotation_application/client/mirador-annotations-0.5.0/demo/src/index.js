@@ -12,98 +12,92 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { Img } from 'react-image';
 import { times } from 'lodash';
 
-const xmlUrl = "http://127.0.0.1:8887/database-dump/database-dump.xml"
+const APIURL = "http://127.0.0.1:5000"
 let miradorInstance;
 
-function getKey(key, record, backupValue){
-  let foundElements = record.getElementsByTagName(key)[0]
-  if (foundElements != undefined){
-    return foundElements.childNodes[0].nodeValue
-  } else {
-    return backupValue
-  } 
+async function fetchAuthors(){
+  return await fetch(APIURL + "/authors")
+    .then(promise => promise.json())
+    .then(function(authors){
+      return authors;
+    })
 }
 
-let lastIndex = 0;
-
-async function fetchXml(){
-  return fetch(xmlUrl)
-        .then(response => response.text())
-        .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
-        .then(function(data){
-          let records = data.getElementsByTagName("record");
-          let gatheredInfo = [];
-          let limit = lastIndex + 20
-          for (let i = lastIndex+1; i < records.length; i++){
-            if (i < limit){
-              let record = records[i];
-              let recordInfo = {
-                title: getKey("imageOpacLink", record, "").split("/").at(-1).replace("-", " ").replace("-L.jpg", ""),
-                thumbnail: "http://www.opac-fabritius.be" + getKey("imageOpacLink", record, ""),
-                created: getKey("latestDate", record, "unknown"),
-                description: getKey("termClassification", record, "") + " \n " + getKey("ObjectWorkType", record, ""),
-                author: {
-                  name: getKey("creatorDescription", record, "unknown"),
-                  birthDate: getKey("birthDateCreator", record, "unknown"),
-                  deathDate: getKey("deathDateCreator", record, "unknown")
-                },
-                manifestId: ("http://127.0.0.1:8887/biiif-npm-version/paintings/" + getKey("workID",record, "").replace("/", "").replace(" ", "") + "-" + getKey("imageOpacLink", record, "").split("/").at(-1).split("-").at(0).replace("/", "") + "/index.json").replace(" ", "")
-              }
-              gatheredInfo.push(recordInfo)
-              lastIndex = i;
-            } 
-          }  
-          return gatheredInfo;
-        });
+async function fetchResources(){
+  return await fetch(APIURL + "/resources" + "?id=&authorName=&authorBirthdate=&authorDeathdate=&creationYear=&description=")
+    .then(promise => promise.json())
+    .then(function(resources){
+      return resources;
+    })
 }
 
 class KmskbComponent extends Component {
-
   constructor(props){
     super(props);
     this.handleClick = this.handleClick.bind(this);
     this.handleLoadMoreResources = this.handleLoadMoreResources.bind(this);
-    this.state = {"infoRecords" : null} ;
+    this.handleResourceLookup = this.handleResourceLookup.bind(this);
+    this.state = {"loading": false, "lastindex":0, "resources": null}
   }
 
-  handleResourceLookup(){
-
+  handleResourceLookup(event){
+    fetch(APIURL + "/resources?id=&authorName=" + event.target.value + "&authorBirthdate=&authorDeathdate=&creationYear=&description=").then(resp => resp.json())
+      .then(filteredResources => this.setState({"resources" : filteredResources}));
+    
   }
 
   handleLoadMoreResources(){
-    let temp = this;
-    temp.setState({"loading": true}),
-    fetchXml().then(function(infoRecords){
-      temp.setState({"infoRecords" : temp.state.infoRecords.concat(infoRecords)});
-      temp.setState({"loading": false})
-    });
+    this.setState({"loading": true, "lastindex": this.state.lastindex+20})
+    this.setState({"loading": false});
   }
   
   handleClick(e){
-    let manifest = e.target.closest("li").dataset.manifestid;
+    let li = e.target.closest("li");
+    let resourceId = li.dataset.resourceid;
+    let authorId = li.dataset.authorid;
+    let resource;
+    let manifest = li.dataset.manifestid;
     let clearWorkspace = mirador.actions.setWorkspaceAddVisibility(false);
-    miradorInstance.store.dispatch(clearWorkspace);
-  
-    let action = mirador.actions.addWindow({
-      companionWindows: "",
-      manifestId: manifest
-    });
-  
-    miradorInstance.store.dispatch(action);
-  
-    let windowId = Object.keys(miradorInstance.store.getState().windows);
-    windowId = undefined;
-    var action2 = mirador.actions.setCanvas(windowId, manifest)
+
+    for (let i = 0; i < this.props.resources.length; i++){
+      if (this.props.resources[i][0] === resourceId){
+        resource = this.props.resources[i];
+      }
+    }
+
+    fetch(APIURL + "/iiif", {method: "POST", body: JSON.stringify({
+        author: this.props.authors[authorId],
+        resource: resource
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    }}).then(resp => resp.text()).then(function(){
+      miradorInstance.store.dispatch(clearWorkspace);
+      let action = mirador.actions.addWindow({
+        companionWindows: "",
+        manifestId: manifest,
+        isFetching: true
+      });
+      
+      miradorInstance.store.dispatch(action);
     
-    miradorInstance.store.dispatch(action2);
+      let windowId = Object.keys(miradorInstance.store.getState().windows);
+      windowId = undefined;
+      var action2 = mirador.actions.setCanvas(windowId, manifest)
+      
+      miradorInstance.store.dispatch(action2);
+    });
   }
+
   
   render(){
-    let infoRecords = this.state.infoRecords;
-    if (infoRecords === null){
-      infoRecords = this.props.infoRecords;
-      this.setState({"infoRecords" : infoRecords})
+    let resources = this.state.resources;
+    const authors = this.props.authors;
+    if (resources === null){
+      resources = this.props.resources;
+      this.setState({"resources" : resources})
     }
+
     return (React.createElement('div', {
       style: {
         height: '100%',
@@ -119,9 +113,9 @@ class KmskbComponent extends Component {
           backgroundColor: "#F5F5F5",
           borderRadius: "0.25rem"
         },
-        label: "Painting or artist name",
+        label: "Artist name",
         variant: "outlined",
-        onchange: this.handleResourceLookup
+        onChange: this.handleResourceLookup
       }),
       React.createElement('ul', {
         id: "resources",
@@ -131,10 +125,9 @@ class KmskbComponent extends Component {
           width: '98%'
         }
       },
-      infoRecords.map((recordInfo) =>
-          React.createElement(ManifestListItem, [this, recordInfo]),
-        )
-      ),
+      resources.slice(0,this.state.lastindex+20).map((resource, index) => 
+        React.createElement(ManifestListItem, [this, resource, authors, index])
+      )),
       React.createElement("div", {
         style: {
           textAlign:"center"
@@ -153,26 +146,38 @@ class KmskbComponent extends Component {
 }
 
 function ManifestListItem(options){
-      let recordInfo = options[1];
+      let resource = options[1];
+      let authors = options[2];
+      let resourceId = resource[0];
+      let author;
       let props = options[0].props;
       let buttonRef = "";
-      let manifestId = recordInfo.manifestId;
       let ready = true;
-      let thumbnail = recordInfo.thumbnail;
       let isCollection = false;
-      let title = recordInfo.title;
       let provider= props.provider;
       var t = props.t;
       let size = 60;
       let manifestLogo = "";
-      let description = recordInfo.description;
-      let author = recordInfo.author;
-      let createdDate = recordInfo.created;
-  
+      let authorId;
+
+      for (let i = 0; i < authors.length; i++){
+        if (authors[i][0] === resource[1]){
+          author = authors[i];
+          authorId = i;
+        }
+      }
+      
+      let manifestId = "http://127.0.0.1:8887/biiif-npm-version/paintings/" + (resource[0].replaceAll("/", "")).replaceAll(" ", "") + "-" + authors[authorId][1].replaceAll("/", "").replaceAll(" ", "") + "/index.json";
+      let imageUrlOld = resource[4].split("/").slice(0,5)
+      let imageUrlNew = imageUrlOld.join().concat(["/internet", resource[4].split("/").at(-1)]).replaceAll(",", "/")
+      let thumbnail = imageUrlNew.replace(/H./, "L.");
+
       return /*#__PURE__*/React.createElement(ListItem, {
           divider: true,
           //className: [classes.root, active ? classes.active : ''].join(' '),
-          "data-manifestid": manifestId
+          "data-manifestid": manifestId,
+          "data-resourceid": resourceId,
+          "data-authorid": authorId
         }, ready ? /*#__PURE__*/React.createElement(Grid, {
           container: true,
           className: ns('manifest-list-item'),
@@ -200,9 +205,9 @@ function ManifestListItem(options){
           sm: 3,
           component: "span"
         }, /*#__PURE__*/React.createElement(Img, {
-          //className: [classes.thumbnail, ns('manifest-list-item-thumb')].join(' '),
+          className: ns('manifest-list-item-thumb'),
           src: thumbnail,
-          alt: "test",
+          alt: "title",
           height: "80",
         })), /*#__PURE__*/React.createElement(Grid, {
           item: true,
@@ -210,19 +215,26 @@ function ManifestListItem(options){
           sm: 9,
           component: "span",
           style: {
-            textAlign: "left"
+            textAlign: "left",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-around"
           }
         }, isCollection && /*#__PURE__*/React.createElement(Typography, {
           component: "div",
           variant: "overline"
-        }, t(isMultipart ? 'multipartCollection' : 'collection')), /*#__PURE__*/React.createElement(Typography, {
+        }, t(isMultipart ? 'multipartCollection' : 'collection')),
+        React.createElement(Typography, {
+          component: "span",
+          variant: "h6",
+          style: {
+            fontWeight: "bold"
+          }
+        }, t("Description")),
+        /*#__PURE__*/React.createElement(Typography, {
           component: "span",
           variant: "h6"
-        }, description), React.createElement(Typography, {
-          style: {
-            marginTop: "1rem"
-          }
-        }, title))))), /*#__PURE__*/React.createElement(Grid, {
+        }, resource[2]))))), /*#__PURE__*/React.createElement(Grid, {
           item: true,
           xs: 8,
           sm: 4
@@ -230,18 +242,18 @@ function ManifestListItem(options){
           className: ns('manifest-list-item-provider')
         }, provider), /*#__PURE__*/React.createElement(Typography, {
   
-        }, "Author: " + author.name + " (" + author.birthDate + " - " + author.deathDate +  ")"),
+        }, "Author: " + author[1] + " (" + author[2] + " - " + author[3] +  ")"),
         React.createElement(Typography, {
             style: {
               marginTop: "1rem"
             }
-        }, "Created in: " + createdDate)
+        }, "Created in: " + resource[3])
         ), /*#__PURE__*/React.createElement(Grid, {
           item: true,
           xs: 4,
           sm: 2
         }, manifestLogo && /*#__PURE__*/React.createElement(Img, {
-          src: [manifestLogo],
+          src: [thumbnail],
           alt: "",
           role: "presentation",
           //className: classes.logo,
@@ -267,18 +279,23 @@ function initialiseMirador(){
       sideBarOpenByDefault: true,
     },
   };
-  fetchXml().then(function(infoRecords){
-    const plugin = {
-      target: 'WorkspaceAdd',
-      mode: 'wrap',
-      component: KmskbComponent,
-      mapStateToProps: () => {
-        return {
-          infoRecords: infoRecords,
-        }
-      }
-    };
-    miradorInstance = mirador.viewer(config, [...annotationPlugins, ...plugin]);
+  fetchAuthors()
+    .then(function(authors){
+      fetchResources()
+        .then(function(resources){
+          const plugin = {
+            target: 'WorkspaceAdd',
+            mode: 'wrap',
+            component: KmskbComponent,
+            mapStateToProps: () => {
+              return {
+                resources: resources,
+                authors: authors
+              }
+            }
+          };
+          miradorInstance = mirador.viewer(config, [...annotationPlugins, ...plugin]);
+      });
   });
 }
 

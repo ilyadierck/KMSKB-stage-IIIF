@@ -64,7 +64,7 @@ for element in list(root):
             "Description": renderDescription(),
             "Author": renderAuthor(),
             "CreationYear": renderKey("latestDate"),
-            "ImageLink": "http://193.190.214.120/airwebopacfabritius/www.image.cls?img=" + renderKey("imageIntranetLink")
+            "ImageLink": "http://www.opac-fabritius.be" + renderKey("imageIntranetLink")
         }
     }
 

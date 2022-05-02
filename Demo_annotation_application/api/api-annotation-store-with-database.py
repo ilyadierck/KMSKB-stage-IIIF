@@ -5,10 +5,18 @@ import mysql.connector
 from flask_cors import CORS
 import json
 import databaseconfig as cfg
+import os
+import requests
+import yaml
+import shutil
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+
+BIIIF_PATH = "biiif-npm-version/paintings/"
+WEBSERVER_URL = "http://127.0.0.1:8887/biiif-npm-version/paintings/"
+FABRITIUS_BASE_URL = "http://www.opac-fabritius.be"
 
 mydb = mysql.connector.connect(
     host= cfg.mysql["host"],
@@ -23,6 +31,36 @@ def resultToDict(result):
         store[annotation[0]] = annotation[1]
     return store
 
+def setupIIIFStructure(image_link, resource_dict):
+    resource_dict["label"] = resource_dict["label"].replace("/", "")
+    biiifPath = BIIIF_PATH + resource_dict["label"]
+    biiifPath = biiifPath.replace(" ", "")
+    if (os.path.exists(biiifPath)):
+        return "http://127.0.0.1:8887/biiif-npm-version/paintings/" + resource_dict["label"] + "/index.json"
+    r = requests.get(image_link, stream = True, timeout=5)
+    
+    if r.status_code == 200:
+        r.raw.decode_content = True
+        
+        image_name = image_link.split("/")[-1]
+
+        if not os.path.exists(biiifPath):
+            os.mkdir(biiifPath)
+
+        with open(biiifPath + "/" + image_name,'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+        
+        ymlPath = biiifPath+ "/"+ 'info.yml'
+        with open(ymlPath, 'w') as file:
+            yaml.dump(resource_dict, file)
+
+        os.system("biiif " + biiifPath + " -u http://127.0.0.1:8887/biiif-npm-version/paintings/" + biiifPath.split("/")[-1])
+        
+
+        return "http://127.0.0.1:8887/biiif-npm-version/paintings/" + resource_dict["label"] + "/index.json"
+    else:
+        print('Unable to download image')
+
 class Annotation(Resource):
     def post(self):
         content = request.json
@@ -34,13 +72,14 @@ class Annotation(Resource):
         val = (id, json.dumps(content))
         mycursor.execute(sql, val)
         mydb.commit()
-
+        mycursor.close()
         return content
 
     def get(self):
         mycursor = mydb.cursor()
         mycursor.execute("SELECT * FROM annotations")
         res = mycursor.fetchall()
+        mycursor.close()
         return resultToDict(res)
 
     def patch(self):
@@ -53,6 +92,7 @@ class Annotation(Resource):
         val = (json.dumps(content), id)
         mycursor.execute(sql, val)
         mydb.commit()
+        mycursor.close()
     
     def delete(self):
         Annotation.patch(self)
@@ -62,15 +102,17 @@ class Authors(Resource):
 
     def get(self):
         if self.authorId == None:
-            parser = reqparse.RequestParser()
-            parser.add_argument('id', type=int)
-            args = parser.parse_args()
-            self.authorId = args.id
+            sql = "SELECT * FROM authors"
+            val = ()
+        else:
+            sql = "SELECT * FROM authors WHERE creatorAuthID = %s"
+            val = (self.authorId,)
         mycursor = mydb.cursor()
-        sql = "SELECT * FROM authors WHERE creatorAuthID = %s"
-        val = (self.authorId,)
+        
         mycursor.execute(sql, val)
         res = mycursor.fetchall()
+        mycursor.close()
+        self.authorId = None
         return res
     
     def post(self, json):
@@ -79,6 +121,7 @@ class Authors(Resource):
         val = (json["name"], json["birthdate"], json["deathdate"], json["creatorAuthID"])
         mycursor.execute(sql, val)
         mydb.commit()
+        mycursor.close()
 
 class Resources(Resource):
     def get(self):
@@ -91,8 +134,8 @@ class Resources(Resource):
         parser.add_argument('description', type=str)
         args = parser.parse_args()
 
-        endResourceSql = "SELECT * FROM resources WHERE "
-        filler = ""
+        endResourceSql = "SELECT * FROM resources"
+        filler = " WHERE "
         if args["id"] != None and args["id"] != "":
             endResourceSql = endResourceSql + filler + "id='" + args["id"] + "'"
             filler = " AND "
@@ -102,7 +145,7 @@ class Resources(Resource):
         if args["description"] != None and args["description"] != "":
             endResourceSql = endResourceSql + filler + "description LIKE '%" + args["description"] + "%'"
             filler = " AND "
-
+        
         endAuthorSql = "SELECT id FROM authors WHERE "
         filler = ""
         if args["authorName"] != None and args["authorName"] != "":
@@ -118,11 +161,12 @@ class Resources(Resource):
         mycursor = mydb.cursor()
 
         if filler != "":
-            endResourceSql += filler + "authorId in (" +  endAuthorSql + ")"
+            endResourceSql += " WHERE authorId in (" +  endAuthorSql + ")"
 
-        print(endResourceSql)
         mycursor.execute(endResourceSql)
-        return mycursor.fetchall()
+        res = mycursor.fetchall()
+        mycursor.close()
+        return res
     
     def post(self):
         content = request.json
@@ -135,17 +179,33 @@ class Resources(Resource):
             Authors.post(self, content["metadata"]["Author"])
             foundAuthor = Authors.get(self)
 
-        print(foundAuthor)
         sql = "INSERT INTO resources (id, authorId, description, creationYear, imageLink) VALUES (%s, %s, %s, %s, %s)"
         val = (str(content["id"]), foundAuthor[0][0], content["metadata"]["Description"], content["metadata"]["CreationYear"], content["metadata"]["ImageLink"])
         mycursor.execute(sql, val)
         mydb.commit()
+        mycursor.close()
 
+class IIIF(Resource):
+    def post(self):
+        content = request.json
+        content = json.loads(json.dumps(content))
+        author = content["author"]
+        resource = content["resource"]
 
+        resource_final_dict = {
+        "label": resource[0] + "-" + author[1],
+        "metadata" : {
+            "Description": resource[2],
+            "Author": author[1] + " (" + author[2] + "-" + author[3] + ")",
+            "Creation year": resource[3]
+            }
+        }
+        return setupIIIFStructure(resource[4], resource_final_dict)
         
 api.add_resource(Annotation, '/annotations') 
 api.add_resource(Resources, '/resources') 
 api.add_resource(Authors, '/authors') 
+api.add_resource(IIIF, '/iiif') 
 
 if __name__ == '__main__':
     app.run()  # run our Flask app
