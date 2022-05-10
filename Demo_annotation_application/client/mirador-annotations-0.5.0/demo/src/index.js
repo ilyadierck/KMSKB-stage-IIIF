@@ -10,6 +10,7 @@ import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@mui/material/Button';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Img } from 'react-image';
+import SendIcon from '@mui/icons-material/Send';
 import { times } from 'lodash';
 
 const APIURL = "http://127.0.0.1:5000"
@@ -25,10 +26,15 @@ async function fetchAuthors(){
 
 async function fetchResources(){
   return await fetch(APIURL + "/resources" + "?id=&authorName=&authorBirthdate=&authorDeathdate=&creationYear=&description=")
-    .then(promise => promise.json())
-    .then(function(resources){
-      return resources;
+    .then(function(promise){
+      if (promise.status != 200){
+        return []
+      }
+      return promise.json().then(function(resources){
+        return resources;
+      })
     })
+    
 }
 
 class KmskbComponent extends Component {
@@ -41,9 +47,11 @@ class KmskbComponent extends Component {
   }
 
   handleResourceLookup(event){
-    fetch(APIURL + "/resources?id=&authorName=" + event.target.value + "&authorBirthdate=&authorDeathdate=&creationYear=&description=").then(resp => resp.json())
-      .then(filteredResources => this.setState({"resources" : filteredResources}));
-    
+    if (!this.state.loading){
+      this.setState({"loading": true});
+      fetch(APIURL + "/resources?id=&authorName=&authorBirthdate=&authorDeathdate=&creationYear=&description=&bulkmetadata=" + document.querySelector("#textInput").value).then(resp => resp.json())
+      .then(filteredResources => this.setState({"resources" : filteredResources})).then(() => this.setState({"loading": false}));
+    } 
   }
 
   handleLoadMoreResources(){
@@ -106,7 +114,11 @@ class KmskbComponent extends Component {
         marginRight: 0,
         overflow: "auto"
         }
-      },React.createElement(TextField, {
+      },
+      React.createElement("div",{
+
+      },
+      React.createElement(TextField, {
         style: {
           marginTop:"2rem",
           width: "98%",
@@ -115,8 +127,18 @@ class KmskbComponent extends Component {
         },
         label: "Artist name",
         variant: "outlined",
-        onChange: this.handleResourceLookup
-      }),
+        id: "textInput"
+      }), React.createElement("div", {
+        style:{
+          marginTop: "0.2rem"
+        }
+
+      },React.createElement(Button, {
+        variant: "contained",
+        onClick: this.handleResourceLookup
+      }, 'Search'))
+      ),
+      
       React.createElement('ul', {
         id: "resources",
         style: {
@@ -159,6 +181,14 @@ function ManifestListItem(options){
       let size = 60;
       let manifestLogo = "";
       let authorId;
+      let title = resource[5];
+      let type = resource[6];
+      if (title === " " || title === "." || title === "unknown"){
+        title = resource[2];
+        type = ""
+      }
+
+      title = title.charAt(0).toUpperCase() + title.slice(1);
 
       for (let i = 0; i < authors.length; i++){
         if (authors[i][0] === resource[1]){
@@ -167,7 +197,7 @@ function ManifestListItem(options){
         }
       }
       
-      let manifestId = "http://127.0.0.1:8887/biiif-npm-version/paintings/" + (resource[0].replaceAll("/", "")).replaceAll(" ", "") + "-" + authors[authorId][1].replaceAll("/", "").replaceAll(" ", "") + "/index.json";
+      let manifestId = "http://127.0.0.1:8887/biiif-npm-version/paintings/" + (resource[0].replaceAll("/", "")).replaceAll(" ", "") + "/index.json";
       let imageUrlOld = resource[4].split("/").slice(0,5)
       let imageUrlNew = imageUrlOld.join().concat(["/internet", resource[4].split("/").at(-1)]).replaceAll(",", "/")
       let thumbnail = imageUrlNew.replace(/H./, "L.");
@@ -230,24 +260,32 @@ function ManifestListItem(options){
           style: {
             fontWeight: "bold"
           }
-        }, t("Description")),
+        }, t(title)),
         /*#__PURE__*/React.createElement(Typography, {
           component: "span",
-          variant: "h6"
-        }, resource[2]))))), /*#__PURE__*/React.createElement(Grid, {
+          variant: "h6",
+        }, author[1] + " (" + author[2] + " - " + author[3] +  ")"))))), /*#__PURE__*/React.createElement(Grid, {
           item: true,
           xs: 8,
-          sm: 4
+          sm: 4,
+          style: {
+            textAlign: "left",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-around"
+          }
         }, /*#__PURE__*/React.createElement(Typography, {
           className: ns('manifest-list-item-provider')
         }, provider), /*#__PURE__*/React.createElement(Typography, {
-  
-        }, "Author: " + author[1] + " (" + author[2] + " - " + author[3] +  ")"),
+            style: {
+              fontWeight: "bold"
+            }
+        }, t("Created")),
         React.createElement(Typography, {
             style: {
               marginTop: "1rem"
             }
-        }, "Created in: " + resource[3])
+        }, resource[3])
         ), /*#__PURE__*/React.createElement(Grid, {
           item: true,
           xs: 4,
@@ -271,7 +309,7 @@ function initialiseMirador(){
   const endpointUrl = "http://127.0.0.1:5000/annotations";
   const config = {
     annotation: {
-      adapter: (canvasId) => new CustomFlaskAdapter(canvasId, endpointUrl)
+      adapter: (id) => new CustomFlaskAdapter(id, endpointUrl)
     },
     id: 'demo',
     window: {
@@ -283,18 +321,18 @@ function initialiseMirador(){
     .then(function(authors){
       fetchResources()
         .then(function(resources){
-          const plugin = {
+          const workshopAddPlugin = {
             target: 'WorkspaceAdd',
             mode: 'wrap',
             component: KmskbComponent,
             mapStateToProps: () => {
               return {
                 resources: resources,
-                authors: authors
+                authors: authors,
               }
             }
           };
-          miradorInstance = mirador.viewer(config, [...annotationPlugins, ...plugin]);
+          miradorInstance = mirador.viewer(config, [...annotationPlugins, ...workshopAddPlugin]);
       });
   });
 }

@@ -18,7 +18,7 @@ def renderKey(key):
     if key in element_dict:
         return element_dict[key]
     else:
-        return ""
+        return "unknown"
 
 def renderDescription():
     if "ObjectWorkType" in element_dict:
@@ -36,9 +36,9 @@ def renderAuthor():
     }
     if "creatorDescription" in element_dict:
         author["name"] = element_dict["creatorDescription"]
-    elif "birthDateCreator" in element_dict and "deathDateCreator" in element_dict:
-        author["birthdate"] = element_dict["birthDateCreator"]
-        author["deathdate"] = element_dict["deathDateCreator"]
+    if "birthDateCreator" in element_dict or "deathDateCreator" in element_dict:
+        author["birthdate"] = renderKey("birthDateCreator")
+        author["deathdate"] = renderKey("deathDateCreator")
     
     author["creatorAuthID"] = renderKey("creatorAuthID")
 
@@ -47,8 +47,11 @@ def renderAuthor():
 
 for element in list(root):
     element_dict = {}
-    for child_element in element.iter():
+    allMetadata = ""
+    element = reversed(list(element.iter()))
+    for child_element in element:
         element_dict[child_element.tag] = str(child_element.text)
+        allMetadata += str(child_element.text) + "," 
 
     if 'imageIntranetLink' not in element_dict or 'workID' not in element_dict:
         continue
@@ -57,19 +60,24 @@ for element in list(root):
 
     element_final_dict = {
         "label": element_dict["workID"] + "-" + image_name.split("-")[0],
-        "id": element_dict["workID"],
+        "id": element_dict["workID"].replace("/", "").replace(" ", ""),
         "attribution": renderKey("copyrightStatement"),
         "metadata" : {
             "OwnedBy": renderKey("legalStatus"),
             "Description": renderDescription(),
             "Author": renderAuthor(),
             "CreationYear": renderKey("latestDate"),
-            "ImageLink": "http://www.opac-fabritius.be" + renderKey("imageIntranetLink")
+            "Title" : renderKey("titleText"),
+            "Type": renderKey("objectWorkType"),
+            "ImageLink": "http://www.opac-fabritius.be" + renderKey("imageIntranetLink"),
+            "LinkToVubis": renderKey("LinkToVubis"),
+            "BulkMetadata": allMetadata
         }
     }
 
-    x = requests.post(API_URL + "resources", json = element_final_dict)
-
+    resp = requests.post(API_URL + "resources", json = element_final_dict)
+    if not resp.ok:
+        print("something went wrong in id:" + element_final_dict["id"])
 
 
 

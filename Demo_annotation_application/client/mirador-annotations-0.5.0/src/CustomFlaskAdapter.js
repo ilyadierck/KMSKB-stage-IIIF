@@ -65,10 +65,11 @@ export default class CustomFlaskAdapter {
   
     /** */
     async delete(annoId) {
-        const annotationPage = await this.all();
+        let annotationPage = await this.all();
         if (annotationPage) {
             annotationPage.items = annotationPage.items.filter((item) => item.id !== annoId);
         }
+        console.log(annotationPage, annoId)
         await fetch(this.apiUrl, {
             body: JSON.stringify(annotationPage),
             headers: {
@@ -103,6 +104,7 @@ export default class CustomFlaskAdapter {
         })
         .then(resp => resp.json())
         .then(function(annotationPages){
+            console.log(annotationPageId)
             let res = annotationPages[annotationPageId];
             if (res != undefined){
                 return JSON.parse(res);
