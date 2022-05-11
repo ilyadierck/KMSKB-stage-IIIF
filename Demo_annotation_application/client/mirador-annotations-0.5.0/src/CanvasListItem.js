@@ -87,6 +87,7 @@ class CanvasListItem extends Component {
     const { children } = this.props;
     const { isHovering } = this.state;
     const { windowViewType, toggleSingleCanvasDialogOpen } = this.context;
+    const { annotationsOnCanvases, canvases } = this.context;
     return (
       <div
         onMouseEnter={this.handleMouseHover}

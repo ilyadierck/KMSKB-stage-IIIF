@@ -13,6 +13,7 @@ import { Img } from 'react-image';
 import SendIcon from '@mui/icons-material/Send';
 import { times } from 'lodash';
 
+
 const APIURL = "http://127.0.0.1:5000"
 let miradorInstance;
 
@@ -125,7 +126,8 @@ class KmskbComponent extends Component {
           backgroundColor: "#F5F5F5",
           borderRadius: "0.25rem"
         },
-        label: "Artist name",
+        label: "Search query",
+        placeholder: "Artist, inventaris number, annotation, ..",
         variant: "outlined",
         id: "textInput"
       }), React.createElement("div", {
@@ -316,6 +318,9 @@ function initialiseMirador(){
       defaultSideBarPanel: 'annotations',
       sideBarOpenByDefault: true,
     },
+    workspace: {
+      isWorkspaceAddVisible: true
+    }
   };
   fetchAuthors()
     .then(function(authors){

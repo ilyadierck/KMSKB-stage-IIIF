@@ -30,6 +30,7 @@ import AnnotationDrawing from './AnnotationDrawing';
 import TextEditor from './TextEditor';
 import WebAnnotation from './WebAnnotation';
 import CursorIcon from './icons/Cursor';
+import AnnotationType from './AnnotationType'
 
 /** */
 class AnnotationCreation extends Component {
@@ -148,6 +149,7 @@ class AnnotationCreation extends Component {
   /** */
   submitForm(e) {
     e.preventDefault();
+    const annotationType = document.querySelector("#annotationType").value.split(",");
     const {
       annotation, canvases, closeCompanionWindow, receiveAnnotation, config,
     } = this.props;
@@ -162,15 +164,15 @@ class AnnotationCreation extends Component {
         id: (annotation && annotation.id) || `${uuid()}`,
         manifestId: canvas.options.resource.id,
         svg,
-        tags,
-        xywh,
+        tags: annotationType,
+        xywh
       }).toJson();
       if (annotation) {
-        storageAdapter.update(anno).then((annoPage) => {
+        storageAdapter.update(anno, annotationType).then((annoPage) => {
           receiveAnnotation(canvas.id, storageAdapter.annotationPageId, annoPage);
         });
       } else {
-        storageAdapter.create(anno).then((annoPage) => {
+        storageAdapter.create(anno, annotationType).then((annoPage) => {
           receiveAnnotation(canvas.id, storageAdapter.annotationPageId, annoPage);
         });
       }
@@ -339,6 +341,16 @@ class AnnotationCreation extends Component {
                   : null
               }
 
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography variant="overline">
+                Annotation type
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <AnnotationType></AnnotationType>
             </Grid>
           </Grid>
           <Grid container>

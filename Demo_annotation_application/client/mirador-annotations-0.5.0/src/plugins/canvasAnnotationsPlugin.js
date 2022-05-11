@@ -33,6 +33,7 @@ class CanvasAnnotationsWrapper extends Component {
       switchToSingleCanvasView, TargetComponent, targetProps, windowViewType,
     } = this.props;
     const { singleCanvasDialogOpen } = this.state;
+    console.log(targetProps)
     const props = {
       ...targetProps,
       listContainerComponent: CanvasListItem,

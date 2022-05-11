@@ -9,6 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { stateToHTML } from 'draft-js-export-html';
 import { stateFromHTML } from 'draft-js-import-html';
 
+
 /** */
 class TextEditor extends Component {
   /** */
